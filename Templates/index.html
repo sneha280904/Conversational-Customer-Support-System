@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        #chat-container {
+            width: 400px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-window {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ccc;
+            padding: 5px;
+        }
+
+        #user-input {
+            width: calc(100% - 60px);
+            margin-right: 10px;
+        }
+
+        #send-button {
+            width: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to the Chatbot!</h1>
+    <div id="chat-container">
+        <div id="chat-window"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            const chatWindow = document.getElementById('chat-window');
+
+            if (!message) return;
+
+            // Display user message
+            appendMessage('User', message);
+
+            input.value = '';
+
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: 'user1', message }),
+                });
+
+                const data = await response.json();
+
+                // Display bot response
+                appendMessage('Bot', data.response || data.error);
+            } catch (error) {
+                appendMessage('Bot', 'Error connecting to server.');
+            }
+        }
+
+        function appendMessage(sender, message) {
+            const chatWindow = document.getElementById('chat-window');
+            const newMessage = document.createElement('div');
+            newMessage.className = sender;
+            newMessage.textContent = ${sender}: ${message};
+            chatWindow.appendChild(newMessage);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('user-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+
+</html>
